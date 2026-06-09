@@ -9,11 +9,11 @@ My personal tmux configuration and a helper script that opens a 6-pane workspace
 
 ## Requirements
 
-- macOS (uses `pbcopy`, `pmset`, `ipconfig` — all built-in)
-- [tmux](https://github.com/tmux/tmux) (3.0+ recommended)
+- macOS (uses `pbcopy` for clipboard — built-in)
+- [tmux](https://github.com/tmux/tmux) **3.2+ recommended** (TrueColor / `tmux-256color`)
 - `zsh` at `/bin/zsh` (default on modern macOS)
 
-No external CLI tools are required. SSID and battery percentage in the status bar are derived from macOS built-in commands (`ipconfig getsummary en0`, `pmset -g batt`).
+No external CLI tools are required.
 
 ## Install
 
@@ -68,21 +68,40 @@ tmux-dev
 
 The prefix is remapped from the tmux default `C-b` to **`C-q`**.
 
-| Binding         | Action                                              |
-| --------------- | --------------------------------------------------- |
-| `C-q`           | Prefix                                              |
-| `prefix` + `\|` | Split pane horizontally (left/right)                |
-| `prefix` + `-`  | Split pane vertically (top/bottom)                  |
-| Mouse drag      | Select text; copies to macOS clipboard on release   |
-| Mouse wheel     | Enter copy mode and scroll                          |
+| Binding                  | Action                                                   |
+| ------------------------ | -------------------------------------------------------- |
+| `C-q`                    | Prefix                                                   |
+| `prefix` + `r`           | Reload `~/.tmux.conf`                                     |
+| `prefix` + `\|`          | Split pane horizontally (inherits current path)          |
+| `prefix` + `-`           | Split pane vertically (inherits current path)            |
+| `prefix` + `c`           | New window (inherits current path)                       |
+| `prefix` + `h/j/k/l`     | Move between panes, Vim-style                             |
+| `prefix` + `H/J/K/L`     | Resize the pane (repeatable without re-pressing prefix)  |
+| `prefix` + `Tab`         | Jump to the previously active window                     |
+| `v` (copy mode)          | Start selection                                          |
+| `y` (copy mode)          | Yank selection to clipboard                              |
+| `r` (copy mode)          | Toggle rectangle (block) selection                      |
+| Mouse drag               | Select text; copies to clipboard on release             |
+| Mouse wheel              | Enter copy mode and scroll                              |
+
+## What's modern here
+
+- **TrueColor (24-bit)** output so modern color themes render correctly.
+- **`tmux-256color`** terminal with `Tc` overrides.
+- **No ESC delay** (`escape-time 10`) — Vim/Neovim feels instant.
+- **Focus events** forwarded to terminal apps (Vim autoread, etc.).
+- **100k-line scrollback** history.
+- **1-based** window/pane indexing with **auto-renumbering** on close.
+- **Vi copy mode** (`v`/`y`/`r`) plus mouse selection.
+- **Minimal status bar** with a transparent background that blends into your terminal.
 
 ## Status bar
 
 - Positioned at the **top** of the screen, centered window list.
-- Left: `hostname:[pane-index]`
-- Right: `Wi-Fi status (📶/❌) battery% [YYYY-MM-DD(Day) HH:MM]` (via `ifconfig` and `pmset`)
-- Refreshes every 1 second.
+- Left: session name in an accent color.
+- Right: `hostname │ YYYY-MM-DD │ HH:MM`.
+- Refreshes every 5 seconds.
 
 ## Clipboard
 
-`set-clipboard on` is enabled and the copy command is set to `pbcopy`, so anything you select with the mouse (or yank in copy mode) lands in the macOS system clipboard.
+`set-clipboard on` is enabled and the copy command is set to `pbcopy`, so anything you select with the mouse (or yank in copy mode with `y`) lands in the macOS system clipboard.
