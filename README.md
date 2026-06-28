@@ -7,7 +7,7 @@ My personal tmux configuration and a helper script that opens a **nano-centric "
 - `.tmux.conf` — tmux configuration (prefix, status bar, mouse, clipboard, key bindings, `nano` as default editor)
 - `.tmux-6pane.sh` — script that creates a `work` session laid out as a nano-centric IDE workspace
 - `.tmux-claude.sh` — script that creates a `claude` session laid out for running Claude Code
-- `.tmux-claude-window.sh` — opens a new window with the same Claude Code 3-pane layout (bound to `prefix + c`)
+- `.tmux-claude-window.sh` — opens a new window with the same Claude Code 3-pane layout (bound to `prefix + Enter`)
 - `.nanorc` — handy nano defaults (line numbers, syntax highlighting, mouse, auto-indent, …)
 
 ## Layout
@@ -135,15 +135,15 @@ The prefix is remapped from the tmux default `C-b` to **`C-q`**.
 
 | Binding         | Action                                              |
 | --------------- | --------------------------------------------------- |
-| `C-q`           | Prefix                                              |
-| `prefix` + `c`  | New window with the Claude Code 3-pane layout       |
-| `prefix` + `C`  | New blank window (tmux default behavior)            |
-| `prefix` + `\|` | Split pane horizontally (left/right)                |
-| `prefix` + `-`  | Split pane vertically (top/bottom)                  |
-| Mouse drag      | Select text; copies to macOS clipboard on release   |
-| Mouse wheel     | Enter copy mode and scroll                          |
+| `C-q`             | Prefix                                            |
+| `prefix` + `Enter`| New window with the Claude Code 3-pane layout      |
+| `prefix` + `c`    | New blank window (tmux default behavior)           |
+| `prefix` + `\|`   | Split pane horizontally (left/right)               |
+| `prefix` + `-`    | Split pane vertically (top/bottom)                 |
+| Mouse drag        | Select text; copies to macOS clipboard on release |
+| Mouse wheel       | Enter copy mode and scroll                         |
 
-> `prefix + c` is rebound from "new blank window" to "new window laid out for Claude Code" via `.tmux-claude-window.sh`. The new window opens in the current pane's directory. Use `prefix + C` if you just want an empty window.
+> `prefix + Enter` opens a new window laid out for Claude Code via `.tmux-claude-window.sh`, in the current pane's directory. `prefix + c` keeps its default behavior (new blank window).
 
 ## Editing with nano
 
