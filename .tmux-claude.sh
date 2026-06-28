@@ -2,6 +2,11 @@
 # Claude Code workspace (macOS / tmux 3.x)
 # Usage: ~/.tmux-claude.sh [project-dir]
 #
+# Behavior:
+#   - Outside tmux: (re)create a session named "claude" and attach to it.
+#   - Inside tmux  (e.g. via `prefix + Enter` in .tmux.conf): open a new
+#     window in the current session. No attach.
+#
 # Layout (4 panes):
 #   +-----------------+-----------------+
 #   | claude code     | lazygit         |
@@ -12,12 +17,16 @@
 SESSION="claude"
 DIR="${1:-$PWD}"
 
-# Kill any existing session with the same name
-tmux kill-session -t "$SESSION" 2>/dev/null
-
-# --- Create the session with the main (claude) pane (top-left) ---
-tmux new-session -d -s "$SESSION" -c "$DIR"
-main=$(tmux list-panes -t "$SESSION" -F '#{pane_id}' | head -n1)
+if [ -z "$TMUX" ]; then
+  # Outside tmux: (re)create the session; use its first pane as `main`
+  tmux kill-session -t "$SESSION" 2>/dev/null
+  tmux new-session -d -s "$SESSION" -c "$DIR"
+  main=$(tmux list-panes -t "$SESSION" -F '#{pane_id}' | head -n1)
+else
+  # Inside tmux: open a new window in the current session
+  win=$(tmux new-window -c "$DIR" -P -F '#{window_id}')
+  main=$(tmux list-panes -t "$win" -F '#{pane_id}' | head -n1)
+fi
 
 # --- Build the 4-pane grid ---
 # Top-right: lazygit (split main horizontally, 50% width)
@@ -48,6 +57,10 @@ tmux send-keys -t "$bot_right" 'echo "diff: git diff | nano -v -   (all: git dif
 # claude: print a hint in the main pane (not auto-started)
 tmux send-keys -t "$main" 'echo "run claude here (claude code)"' C-m
 
-# Focus the main pane and attach
+# Focus the main pane
 tmux select-pane -t "$main"
-tmux attach -t "$SESSION"
+
+# Attach only when invoked from outside tmux
+if [ -z "$TMUX" ]; then
+  tmux attach -t "$SESSION"
+fi
