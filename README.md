@@ -7,6 +7,7 @@ My personal tmux configuration and a helper script that opens a **nano-centric "
 - `.tmux.conf` — tmux configuration (prefix, status bar, mouse, clipboard, key bindings, `nano` as default editor)
 - `.tmux-6pane.sh` — script that creates a `work` session laid out as a nano-centric IDE workspace
 - `.tmux-claude.sh` — script that creates a `claude` session laid out for running Claude Code
+- `.tmux-claude-window.sh` — opens a new window with the same Claude Code 3-pane layout (bound to `prefix + c`)
 - `.nanorc` — handy nano defaults (line numbers, syntax highlighting, mouse, auto-indent, …)
 
 ## Layout
@@ -84,8 +85,9 @@ git clone https://github.com/<you>/tmux-setting.git
 cp tmux-setting/.tmux.conf ~/.tmux.conf
 cp tmux-setting/.tmux-6pane.sh ~/.tmux-6pane.sh
 cp tmux-setting/.tmux-claude.sh ~/.tmux-claude.sh
+cp tmux-setting/.tmux-claude-window.sh ~/.tmux-claude-window.sh
 cp tmux-setting/.nanorc ~/.nanorc
-chmod +x ~/.tmux-6pane.sh ~/.tmux-claude.sh
+chmod +x ~/.tmux-6pane.sh ~/.tmux-claude.sh ~/.tmux-claude-window.sh
 ```
 
 Reload the config inside an existing tmux session:
@@ -134,10 +136,14 @@ The prefix is remapped from the tmux default `C-b` to **`C-q`**.
 | Binding         | Action                                              |
 | --------------- | --------------------------------------------------- |
 | `C-q`           | Prefix                                              |
+| `prefix` + `c`  | New window with the Claude Code 3-pane layout       |
+| `prefix` + `C`  | New blank window (tmux default behavior)            |
 | `prefix` + `\|` | Split pane horizontally (left/right)                |
 | `prefix` + `-`  | Split pane vertically (top/bottom)                  |
 | Mouse drag      | Select text; copies to macOS clipboard on release   |
 | Mouse wheel     | Enter copy mode and scroll                          |
+
+> `prefix + c` is rebound from "new blank window" to "new window laid out for Claude Code" via `.tmux-claude-window.sh`. The new window opens in the current pane's directory. Use `prefix + C` if you just want an empty window.
 
 ## Editing with nano
 
