@@ -1,0 +1,21 @@
+# nano configuration — convenient defaults for a lightweight IDE workflow
+# Install location: ~/.nanorc
+
+set linenumbers        # Show line numbers
+set numbercolor cyan,  # Line-number color
+
+set mouse              # Enable mouse (click to move / select)
+set softwrap           # Wrap long lines on screen (does not alter the file)
+set tabsize 4          # Tab width = 4
+set tabstospaces       # Convert tabs to spaces
+set autoindent         # Keep the previous line's indent on newline
+set smarthome          # Home toggles between start-of-line and first non-blank
+set constantshow       # Always show the cursor position (line / column)
+set indicator          # Show a scroll indicator
+set zap                # Backspace/Delete removes the whole selection at once
+set trimblanks         # Strip trailing whitespace on save
+
+# Syntax highlighting (load every definition that is installed)
+# Linux: /usr/share/nano/  /  macOS (Homebrew): /opt/homebrew/share/nano/
+include "/usr/share/nano/*.nanorc"
+# include "/opt/homebrew/share/nano/*.nanorc"

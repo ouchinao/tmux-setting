@@ -1,19 +1,80 @@
 # tmux-setting
 
-My personal tmux configuration and a helper script that opens a 6-pane workspace in one command.
+My personal tmux configuration and a helper script that opens a **nano-centric "lightweight IDE"** 6-pane workspace in one command. No Vim/LazyVim required — editing is done with plain `nano`.
 
 ## Contents
 
-- `.tmux.conf` — tmux configuration (prefix, status bar, mouse, clipboard, key bindings)
-- `.tmux-6pane.sh` — script that creates a `work` session split into 6 evenly tiled panes
+- `.tmux.conf` — tmux configuration (prefix, status bar, mouse, clipboard, key bindings, `nano` as default editor)
+- `.tmux-6pane.sh` — script that creates a `work` session laid out as a nano-centric IDE workspace
+- `.tmux-claude.sh` — script that creates a `claude` session laid out for running Claude Code
+- `.tmux-claude-window.sh` — opens a new window with the same Claude Code 3-pane layout (bound to `prefix + Enter`)
+- `.nanorc` — handy nano defaults (line numbers, syntax highlighting, mouse, auto-indent, …)
+
+## Layout
+
+```
++-------------------------+---------------+
+|                         | git (lazygit) |
+|                         +---------------+
+|     editor (nano)       | def jump      |
+|                         +---------------+
+|                         | search rg/fzf |
++------------+------------+---------------+
+| run / test |   shell    |               |
++------------+------------+---------------+
+```
+
+| Pane         | Purpose                                                   |
+| ------------ | -------------------------------------------------------- |
+| editor       | Main editing pane — `nano <file>` to edit                |
+| run / test   | Run your build / tests                                   |
+| shell        | Free shell                                               |
+| git          | `lazygit` (auto-started if installed)                    |
+| def jump     | Jump to definitions with `rg` (`rg -n "def <symbol>"`)   |
+| search       | Search the project with `rg` / `rg --files \| fzf`       |
+
+### Claude Code layout (`.tmux-claude.sh`)
+
+A leaner layout for running [Claude Code](https://claude.com/claude-code) — Claude already handles editing, search and git internally, so it gets one big wide pane with a nano diff viewer and a shell alongside.
+
+```
++----------------------------+-------------+
+|                            | diff (nano) |
+|       claude code          |             |
+|       (wide)               +-------------+
+|                            | shell       |
++----------------------------+-------------+
+```
+
+| Pane        | Purpose                                                  |
+| ----------- | ------------------------------------------------------- |
+| claude code | Run `claude` here (not auto-started — a hint is printed) |
+| diff (nano) | Review Claude's changes in nano (see below)              |
+| shell       | Free shell for dev server / tests / logs                |
+
+Review Claude's diffs **in nano** (no extra tools needed — `nano -` reads stdin and `patch.nanorc` colorizes the diff):
+
+```sh
+git diff | nano -v -        # unstaged changes, read-only (-v = view mode)
+git diff HEAD | nano -v -   # all changes incl. staged
+```
+
+Start it with `~/.tmux-claude.sh [project-dir]` (creates a separate `claude` session, independent of `work`).
 
 ## Requirements
 
-- macOS (uses `pbcopy`, `pmset`, `ipconfig` — all built-in)
+- macOS (uses `pbcopy`, `pmset`, `ifconfig` — all built-in)
 - [tmux](https://github.com/tmux/tmux) (3.0+ recommended)
 - `zsh` at `/bin/zsh` (default on modern macOS)
+- `nano` (default editor for the workspace)
 
-No external CLI tools are required. SSID and battery percentage in the status bar are derived from macOS built-in commands (`ipconfig getsummary en0`, `pmset -g batt`).
+Optional (the workspace degrades gracefully without them):
+
+- [`lazygit`](https://github.com/jesseduffield/lazygit) — git pane (`brew install lazygit`)
+- [`ripgrep`](https://github.com/BurntSushi/ripgrep) (`rg`) — def-jump & search panes (`brew install ripgrep`)
+- [`fzf`](https://github.com/junegunn/fzf) — fuzzy file picking (`brew install fzf`)
+
+SSID and battery percentage in the status bar are derived from macOS built-in commands (`ifconfig`, `pmset -g batt`).
 
 ## Install
 
@@ -23,7 +84,10 @@ Place both files directly in your home directory:
 git clone https://github.com/<you>/tmux-setting.git
 cp tmux-setting/.tmux.conf ~/.tmux.conf
 cp tmux-setting/.tmux-6pane.sh ~/.tmux-6pane.sh
-chmod +x ~/.tmux-6pane.sh
+cp tmux-setting/.tmux-claude.sh ~/.tmux-claude.sh
+cp tmux-setting/.tmux-claude-window.sh ~/.tmux-claude-window.sh
+cp tmux-setting/.nanorc ~/.nanorc
+chmod +x ~/.tmux-6pane.sh ~/.tmux-claude.sh ~/.tmux-claude-window.sh
 ```
 
 Reload the config inside an existing tmux session:
@@ -43,10 +107,11 @@ tmux
 ### Start the 6-pane workspace
 
 ```sh
-~/.tmux-6pane.sh
+~/.tmux-6pane.sh            # use the current directory as the project
+~/.tmux-6pane.sh ~/code/app # or pass a project directory
 ```
 
-This kills any existing `work` session, creates a fresh one with 6 tiled panes, and attaches to it.
+This kills any existing `work` session, creates a fresh nano-centric workspace (see [Layout](#layout)) rooted at the given project directory, and attaches to it. The git pane auto-starts `lazygit` if it is installed; the def-jump and search panes print `rg`/`fzf` hints.
 
 #### Optional: add a shell shortcut
 
@@ -70,11 +135,34 @@ The prefix is remapped from the tmux default `C-b` to **`C-q`**.
 
 | Binding         | Action                                              |
 | --------------- | --------------------------------------------------- |
-| `C-q`           | Prefix                                              |
-| `prefix` + `\|` | Split pane horizontally (left/right)                |
-| `prefix` + `-`  | Split pane vertically (top/bottom)                  |
-| Mouse drag      | Select text; copies to macOS clipboard on release   |
-| Mouse wheel     | Enter copy mode and scroll                          |
+| `C-q`             | Prefix                                            |
+| `prefix` + `Enter`| New window with the Claude Code 3-pane layout      |
+| `prefix` + `c`    | New blank window (tmux default behavior)           |
+| `prefix` + `\|`   | Split pane horizontally (left/right)               |
+| `prefix` + `-`    | Split pane vertically (top/bottom)                 |
+| Mouse drag        | Select text; copies to macOS clipboard on release |
+| Mouse wheel       | Enter copy mode and scroll                         |
+
+> `prefix + Enter` opens a new window laid out for Claude Code via `.tmux-claude-window.sh`, in the current pane's directory. `prefix + c` keeps its default behavior (new blank window).
+
+## Editing with nano
+
+The workspace is built around `nano` instead of Vim/LazyVim, so there are no modes to learn — just start typing. `EDITOR`/`VISUAL` are set to `nano` in `.tmux.conf`, and `.nanorc` enables line numbers, syntax highlighting, mouse support and auto-indent.
+
+Common nano commands (all use `Ctrl`, shown as `^`):
+
+| Key      | Action                          |
+| -------- | ------------------------------- |
+| `^O`     | Save (write Out)                |
+| `^X`     | Exit                            |
+| `^K`     | Cut current line                |
+| `^U`     | Paste (Uncut)                   |
+| `^W`     | Search (Where Is) — `^W ^W` next |
+| `^\`     | Search & replace                |
+| `^G`     | Help (full command list)        |
+| `^_`     | Go to line/column               |
+| `M-U`    | Undo (`M-` = Alt/Option)        |
+| `M-E`    | Redo                            |
 
 ## Status bar
 
