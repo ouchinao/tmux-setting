@@ -1,14 +1,14 @@
 #!/bin/bash
-# Open a new window with the Claude Code 3-pane layout in the current session.
+# Open a new window with the Claude Code 4-pane layout in the current session.
 # Intended to be invoked from prefix + Enter in .tmux.conf.
 # Usage: ~/.tmux-claude-window.sh [dir]
 #
 # Layout (same as .tmux-claude.sh):
-#   +----------------------------+-------------+
-#   |                            | diff (nano) |
-#   |       claude code          +-------------+
-#   |       (wide)               | shell       |
-#   +----------------------------+-------------+
+#   +-----------------+-----------------+
+#   | claude code     | lazygit         |
+#   +-----------------+-----------------+
+#   | shell           | nano (diff)     |
+#   +-----------------+-----------------+
 
 DIR="${1:-$PWD}"
 
@@ -16,19 +16,22 @@ DIR="${1:-$PWD}"
 win=$(tmux new-window -c "$DIR" -P -F '#{window_id}')
 main=$(tmux list-panes -t "$win" -F '#{pane_id}' | head -n1)
 
-# Right column: diff (nano) and shell
-side_git=$(tmux split-window -h -l 35% -c "$DIR" -t "$main"     -P -F '#{pane_id}')
-side_sh=$(tmux  split-window -v        -c "$DIR" -t "$side_git" -P -F '#{pane_id}')
+# Build the 4-pane grid
+top_right=$(tmux split-window -h -l 50% -c "$DIR" -t "$main"      -P -F '#{pane_id}')
+bot_left=$(tmux  split-window -v -l 50% -c "$DIR" -t "$main"      -P -F '#{pane_id}')
+bot_right=$(tmux split-window -v -l 50% -c "$DIR" -t "$top_right" -P -F '#{pane_id}')
 
 # Pane titles
-tmux select-pane -t "$main"     -T "claude code"
-tmux select-pane -t "$side_git" -T "diff (nano)"
-tmux select-pane -t "$side_sh"  -T "shell"
+tmux select-pane -t "$main"      -T "claude code"
+tmux select-pane -t "$top_right" -T "lazygit"
+tmux select-pane -t "$bot_left"  -T "shell"
+tmux select-pane -t "$bot_right" -T "nano (diff)"
 
-# Initial command per pane (hints)
-tmux send-keys -t "$side_git" 'echo "diff: git diff | nano -v -   (all: git diff HEAD | nano -v -)"' C-m
-tmux send-keys -t "$side_sh"  'echo "shell: dev server / test / logs etc."' C-m
-tmux send-keys -t "$main"     'echo "run claude here (claude code)"' C-m
+# Initial command per pane
+tmux send-keys -t "$top_right" 'lazygit' C-m
+tmux send-keys -t "$bot_left"  'echo "shell: dev server / test / logs etc."' C-m
+tmux send-keys -t "$bot_right" 'echo "diff: git diff | nano -v -   (all: git diff HEAD | nano -v -)"' C-m
+tmux send-keys -t "$main"      'echo "run claude here (claude code)"' C-m
 
 # Focus the main pane
 tmux select-window -t "$win"
