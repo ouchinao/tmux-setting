@@ -34,12 +34,12 @@ My personal tmux configuration and a helper script that opens a **nano-centric "
 
 ### Claude Code layout (`.tmux-claude.sh`)
 
-A leaner layout for running [Claude Code](https://claude.com/claude-code) — Claude already handles editing, search and git internally, so it gets one big wide pane with just git and a shell alongside.
+A leaner layout for running [Claude Code](https://claude.com/claude-code) — Claude already handles editing, search and git internally, so it gets one big wide pane with a nano diff viewer and a shell alongside.
 
 ```
 +----------------------------+-------------+
-|                            | git (diff)  |
-|       claude code          | (lazygit)   |
+|                            | diff (nano) |
+|       claude code          |             |
 |       (wide)               +-------------+
 |                            | shell       |
 +----------------------------+-------------+
@@ -48,8 +48,15 @@ A leaner layout for running [Claude Code](https://claude.com/claude-code) — Cl
 | Pane        | Purpose                                                  |
 | ----------- | ------------------------------------------------------- |
 | claude code | Run `claude` here (not auto-started — a hint is printed) |
-| git         | `lazygit` (auto-started) — review Claude's diffs at a glance |
+| diff (nano) | Review Claude's changes in nano (see below)              |
 | shell       | Free shell for dev server / tests / logs                |
+
+Review Claude's diffs **in nano** (no extra tools needed — `nano -` reads stdin and `patch.nanorc` colorizes the diff):
+
+```sh
+git diff | nano -v -        # unstaged changes, read-only (-v = view mode)
+git diff HEAD | nano -v -   # all changes incl. staged
+```
 
 Start it with `~/.tmux-claude.sh [project-dir]` (creates a separate `claude` session, independent of `work`).
 
