@@ -6,8 +6,7 @@ My personal tmux configuration and a helper script that opens a **nano-centric "
 
 - `.tmux.conf` — tmux configuration (prefix, status bar, mouse, clipboard, key bindings, `nano` as default editor)
 - `.tmux-6pane.sh` — script that creates a `work` session laid out as a nano-centric IDE workspace
-- `.tmux-claude.sh` — script that creates a `claude` session laid out for running Claude Code
-- `.tmux-claude-window.sh` — opens a new window with the same Claude Code 3-pane layout (bound to `prefix + Enter`)
+- `.tmux-claude.sh` — script that creates a 4-pane layout for running Claude Code. Run outside tmux it creates a `claude` session; run inside tmux (e.g. via `prefix + Enter`) it opens a new window in the current session
 - `.nanorc` — handy nano defaults (line numbers, syntax highlighting, mouse, auto-indent, …)
 
 ## Layout
@@ -35,22 +34,22 @@ My personal tmux configuration and a helper script that opens a **nano-centric "
 
 ### Claude Code layout (`.tmux-claude.sh`)
 
-A leaner layout for running [Claude Code](https://claude.com/claude-code) — Claude already handles editing, search and git internally, so it gets one big wide pane with a nano diff viewer and a shell alongside.
+A layout for running [Claude Code](https://claude.com/claude-code) — Claude already handles editing and search internally, so it gets a big top-left pane, with `lazygit`, a free shell, and a nano diff viewer alongside.
 
 ```
-+----------------------------+-------------+
-|                            | diff (nano) |
-|       claude code          |             |
-|       (wide)               +-------------+
-|                            | shell       |
-+----------------------------+-------------+
++-----------------+-----------------+
+| claude code     | lazygit         |
++-----------------+-----------------+
+| shell           | nano (diff)     |
++-----------------+-----------------+
 ```
 
 | Pane        | Purpose                                                  |
 | ----------- | ------------------------------------------------------- |
 | claude code | Run `claude` here (not auto-started — a hint is printed) |
-| diff (nano) | Review Claude's changes in nano (see below)              |
+| lazygit     | `lazygit` TUI (auto-started)                             |
 | shell       | Free shell for dev server / tests / logs                |
+| nano (diff) | Review Claude's changes in nano (see below)              |
 
 Review Claude's diffs **in nano** (no extra tools needed — `nano -` reads stdin and `patch.nanorc` colorizes the diff):
 
@@ -59,7 +58,7 @@ git diff | nano -v -        # unstaged changes, read-only (-v = view mode)
 git diff HEAD | nano -v -   # all changes incl. staged
 ```
 
-Start it with `~/.tmux-claude.sh [project-dir]` (creates a separate `claude` session, independent of `work`).
+Start it with `~/.tmux-claude.sh [project-dir]`. Outside tmux it creates a separate `claude` session (independent of `work`) and attaches; inside tmux it opens the layout as a new window in the current session (this is what `prefix + Enter` does).
 
 ## Requirements
 
@@ -78,16 +77,15 @@ SSID and battery percentage in the status bar are derived from macOS built-in co
 
 ## Install
 
-Place both files directly in your home directory:
+Place the files directly in your home directory:
 
 ```sh
 git clone https://github.com/<you>/tmux-setting.git
 cp tmux-setting/.tmux.conf ~/.tmux.conf
 cp tmux-setting/.tmux-6pane.sh ~/.tmux-6pane.sh
 cp tmux-setting/.tmux-claude.sh ~/.tmux-claude.sh
-cp tmux-setting/.tmux-claude-window.sh ~/.tmux-claude-window.sh
 cp tmux-setting/.nanorc ~/.nanorc
-chmod +x ~/.tmux-6pane.sh ~/.tmux-claude.sh ~/.tmux-claude-window.sh
+chmod +x ~/.tmux-6pane.sh ~/.tmux-claude.sh
 ```
 
 Reload the config inside an existing tmux session:
@@ -136,14 +134,14 @@ The prefix is remapped from the tmux default `C-b` to **`C-q`**.
 | Binding         | Action                                              |
 | --------------- | --------------------------------------------------- |
 | `C-q`             | Prefix                                            |
-| `prefix` + `Enter`| New window with the Claude Code 3-pane layout      |
+| `prefix` + `Enter`| New window with the Claude Code 4-pane layout      |
 | `prefix` + `c`    | New blank window (tmux default behavior)           |
 | `prefix` + `\|`   | Split pane horizontally (left/right)               |
 | `prefix` + `-`    | Split pane vertically (top/bottom)                 |
 | Mouse drag        | Select text; copies to macOS clipboard on release |
 | Mouse wheel       | Enter copy mode and scroll                         |
 
-> `prefix + Enter` opens a new window laid out for Claude Code via `.tmux-claude-window.sh`, in the current pane's directory. `prefix + c` keeps its default behavior (new blank window).
+> `prefix + Enter` opens a new window laid out for Claude Code via `.tmux-claude.sh`, in the current pane's directory. `prefix + c` keeps its default behavior (new blank window).
 
 ## Editing with nano
 
