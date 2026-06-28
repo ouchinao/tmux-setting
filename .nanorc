@@ -1,21 +1,21 @@
-# nano 設定 — 軽量IDEワークフロー用の使いやすい初期設定
-# 配置先: ~/.nanorc
+# nano configuration — convenient defaults for a lightweight IDE workflow
+# Install location: ~/.nanorc
 
-set linenumbers        # 行番号を表示
-set numbercolor cyan,  # 行番号の色
+set linenumbers        # Show line numbers
+set numbercolor cyan,  # Line-number color
 
-set mouse              # マウス操作を有効化（クリックで移動・選択）
-set softwrap           # 長い行を折り返して表示（実体は折り返さない）
-set tabsize 4          # タブ幅を4に
-set tabstospaces       # タブをスペースに変換
-set autoindent         # 改行時に前行のインデントを引き継ぐ
-set smarthome          # Homeキーで行頭/インデント先頭をトグル
-set constantshow       # カーソル位置（行・列）を常時表示
-set indicator          # スクロールインジケータを表示
-set zap                # 選択範囲をBackspace/Deleteで一括削除
-set trimblanks         # 保存時に行末の空白を削除
+set mouse              # Enable mouse (click to move / select)
+set softwrap           # Wrap long lines on screen (does not alter the file)
+set tabsize 4          # Tab width = 4
+set tabstospaces       # Convert tabs to spaces
+set autoindent         # Keep the previous line's indent on newline
+set smarthome          # Home toggles between start-of-line and first non-blank
+set constantshow       # Always show the cursor position (line / column)
+set indicator          # Show a scroll indicator
+set zap                # Backspace/Delete removes the whole selection at once
+set trimblanks         # Strip trailing whitespace on save
 
-# シンタックスハイライト（インストール済みの定義をすべて読み込む）
-# Linux: /usr/share/nano/  /  macOS(Homebrew): /opt/homebrew/share/nano/
+# Syntax highlighting (load every definition that is installed)
+# Linux: /usr/share/nano/  /  macOS (Homebrew): /opt/homebrew/share/nano/
 include "/usr/share/nano/*.nanorc"
 # include "/opt/homebrew/share/nano/*.nanorc"
