@@ -1,19 +1,50 @@
 # tmux-setting
 
-My personal tmux configuration and a helper script that opens a 6-pane workspace in one command.
+My personal tmux configuration and a helper script that opens a **nano-centric "lightweight IDE"** 6-pane workspace in one command. No Vim/LazyVim required — editing is done with plain `nano`.
 
 ## Contents
 
-- `.tmux.conf` — tmux configuration (prefix, status bar, mouse, clipboard, key bindings)
-- `.tmux-6pane.sh` — script that creates a `work` session split into 6 evenly tiled panes
+- `.tmux.conf` — tmux configuration (prefix, status bar, mouse, clipboard, key bindings, `nano` as default editor)
+- `.tmux-6pane.sh` — script that creates a `work` session laid out as a nano-centric IDE workspace
+- `.nanorc` — handy nano defaults (line numbers, syntax highlighting, mouse, auto-indent, …)
+
+## Layout
+
+```
++-------------------------+---------------+
+|                         | git (lazygit) |
+|                         +---------------+
+|     editor (nano)       | def jump      |
+|                         +---------------+
+|                         | search rg/fzf |
++------------+------------+---------------+
+| run / test |   shell    |               |
++------------+------------+---------------+
+```
+
+| Pane         | Purpose                                                   |
+| ------------ | -------------------------------------------------------- |
+| editor       | Main editing pane — `nano <file>` to edit                |
+| run / test   | Run your build / tests                                   |
+| shell        | Free shell                                               |
+| git          | `lazygit` (auto-started if installed)                    |
+| def jump     | Jump to definitions with `rg` (`rg -n "def <symbol>"`)   |
+| search       | Search the project with `rg` / `rg --files \| fzf`       |
 
 ## Requirements
 
-- macOS (uses `pbcopy`, `pmset`, `ipconfig` — all built-in)
+- macOS (uses `pbcopy`, `pmset`, `ifconfig` — all built-in)
 - [tmux](https://github.com/tmux/tmux) (3.0+ recommended)
 - `zsh` at `/bin/zsh` (default on modern macOS)
+- `nano` (default editor for the workspace)
 
-No external CLI tools are required. SSID and battery percentage in the status bar are derived from macOS built-in commands (`ipconfig getsummary en0`, `pmset -g batt`).
+Optional (the workspace degrades gracefully without them):
+
+- [`lazygit`](https://github.com/jesseduffield/lazygit) — git pane (`brew install lazygit`)
+- [`ripgrep`](https://github.com/BurntSushi/ripgrep) (`rg`) — def-jump & search panes (`brew install ripgrep`)
+- [`fzf`](https://github.com/junegunn/fzf) — fuzzy file picking (`brew install fzf`)
+
+SSID and battery percentage in the status bar are derived from macOS built-in commands (`ifconfig`, `pmset -g batt`).
 
 ## Install
 
@@ -23,6 +54,7 @@ Place both files directly in your home directory:
 git clone https://github.com/<you>/tmux-setting.git
 cp tmux-setting/.tmux.conf ~/.tmux.conf
 cp tmux-setting/.tmux-6pane.sh ~/.tmux-6pane.sh
+cp tmux-setting/.nanorc ~/.nanorc
 chmod +x ~/.tmux-6pane.sh
 ```
 
@@ -43,10 +75,11 @@ tmux
 ### Start the 6-pane workspace
 
 ```sh
-~/.tmux-6pane.sh
+~/.tmux-6pane.sh            # use the current directory as the project
+~/.tmux-6pane.sh ~/code/app # or pass a project directory
 ```
 
-This kills any existing `work` session, creates a fresh one with 6 tiled panes, and attaches to it.
+This kills any existing `work` session, creates a fresh nano-centric workspace (see [Layout](#layout)) rooted at the given project directory, and attaches to it. The git pane auto-starts `lazygit` if it is installed; the def-jump and search panes print `rg`/`fzf` hints.
 
 #### Optional: add a shell shortcut
 
@@ -75,6 +108,25 @@ The prefix is remapped from the tmux default `C-b` to **`C-q`**.
 | `prefix` + `-`  | Split pane vertically (top/bottom)                  |
 | Mouse drag      | Select text; copies to macOS clipboard on release   |
 | Mouse wheel     | Enter copy mode and scroll                          |
+
+## Editing with nano
+
+The workspace is built around `nano` instead of Vim/LazyVim, so there are no modes to learn — just start typing. `EDITOR`/`VISUAL` are set to `nano` in `.tmux.conf`, and `.nanorc` enables line numbers, syntax highlighting, mouse support and auto-indent.
+
+Common nano commands (all use `Ctrl`, shown as `^`):
+
+| Key      | Action                          |
+| -------- | ------------------------------- |
+| `^O`     | Save (write Out)                |
+| `^X`     | Exit                            |
+| `^K`     | Cut current line                |
+| `^U`     | Paste (Uncut)                   |
+| `^W`     | Search (Where Is) — `^W ^W` next |
+| `^\`     | Search & replace                |
+| `^G`     | Help (full command list)        |
+| `^_`     | Go to line/column               |
+| `M-U`    | Undo (`M-` = Alt/Option)        |
+| `M-E`    | Redo                            |
 
 ## Status bar
 
