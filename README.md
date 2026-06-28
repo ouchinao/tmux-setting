@@ -6,6 +6,7 @@ My personal tmux configuration and a helper script that opens a **nano-centric "
 
 - `.tmux.conf` — tmux configuration (prefix, status bar, mouse, clipboard, key bindings, `nano` as default editor)
 - `.tmux-6pane.sh` — script that creates a `work` session laid out as a nano-centric IDE workspace
+- `.tmux-claude.sh` — script that creates a `claude` session laid out for running Claude Code
 - `.nanorc` — handy nano defaults (line numbers, syntax highlighting, mouse, auto-indent, …)
 
 ## Layout
@@ -31,6 +32,27 @@ My personal tmux configuration and a helper script that opens a **nano-centric "
 | def jump     | Jump to definitions with `rg` (`rg -n "def <symbol>"`)   |
 | search       | Search the project with `rg` / `rg --files \| fzf`       |
 
+### Claude Code layout (`.tmux-claude.sh`)
+
+A leaner layout for running [Claude Code](https://claude.com/claude-code) — Claude already handles editing, search and git internally, so it gets one big wide pane with just git and a shell alongside.
+
+```
++----------------------------+-------------+
+|                            | git (diff)  |
+|       claude code          | (lazygit)   |
+|       (wide)               +-------------+
+|                            | shell       |
++----------------------------+-------------+
+```
+
+| Pane        | Purpose                                                  |
+| ----------- | ------------------------------------------------------- |
+| claude code | Run `claude` here (not auto-started — a hint is printed) |
+| git         | `lazygit` (auto-started) — review Claude's diffs at a glance |
+| shell       | Free shell for dev server / tests / logs                |
+
+Start it with `~/.tmux-claude.sh [project-dir]` (creates a separate `claude` session, independent of `work`).
+
 ## Requirements
 
 - macOS (uses `pbcopy`, `pmset`, `ifconfig` — all built-in)
@@ -54,8 +76,9 @@ Place both files directly in your home directory:
 git clone https://github.com/<you>/tmux-setting.git
 cp tmux-setting/.tmux.conf ~/.tmux.conf
 cp tmux-setting/.tmux-6pane.sh ~/.tmux-6pane.sh
+cp tmux-setting/.tmux-claude.sh ~/.tmux-claude.sh
 cp tmux-setting/.nanorc ~/.nanorc
-chmod +x ~/.tmux-6pane.sh
+chmod +x ~/.tmux-6pane.sh ~/.tmux-claude.sh
 ```
 
 Reload the config inside an existing tmux session:
